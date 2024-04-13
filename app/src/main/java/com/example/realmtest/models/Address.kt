@@ -9,8 +9,6 @@ import org.mongodb.kbson.ObjectId
 // Students many-to-many Course
 
 class Address : EmbeddedRealmObject {
-    @PrimaryKey
-    var _id: ObjectId = ObjectId()
     var fullName: String = ""
     var street: String = ""
     var houseNumber: Int = 0

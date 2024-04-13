@@ -7,12 +7,32 @@ import com.example.realmtest.models.Course
 import com.example.realmtest.models.Student
 import com.example.realmtest.models.Teacher
 import io.realm.kotlin.UpdatePolicy
+import io.realm.kotlin.ext.query
 import io.realm.kotlin.ext.realmListOf
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class MainViewModel : ViewModel() {
 
     private val realm = App.realm
+
+    val courses = realm
+        .query<Course>()
+        .asFlow()
+        .map { results ->
+            results.list.toList()
+        }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(),
+            emptyList()
+        )
+
+    init {
+        createSampleEntries()
+    }
 
     private fun createSampleEntries() {
         viewModelScope.launch {
