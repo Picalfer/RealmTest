@@ -20,7 +20,8 @@ class MainViewModel : ViewModel() {
 
     val courses = realm
         .query<Course>(
-            "enrolledStudents.@count >= 2"
+            "teacher.address.fullName CONTAINS $0",
+            "Sam"
         )
         .asFlow()
         .map { results ->
