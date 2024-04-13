@@ -19,7 +19,10 @@ class MainViewModel : ViewModel() {
     private val realm = App.realm
 
     val courses = realm
-        .query<Course>()
+        .query<Course>(
+            "enrolledStudents.name == $0",
+            "Jack Junior"
+        )
         .asFlow()
         .map { results ->
             results.list.toList()
@@ -31,7 +34,7 @@ class MainViewModel : ViewModel() {
         )
 
     init {
-        createSampleEntries()
+        //createSampleEntries()
     }
 
     private fun createSampleEntries() {
