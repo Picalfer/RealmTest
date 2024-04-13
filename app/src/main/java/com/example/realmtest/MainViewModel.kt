@@ -1,5 +1,8 @@
 package com.example.realmtest
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.realmtest.models.Address
@@ -7,6 +10,7 @@ import com.example.realmtest.models.Course
 import com.example.realmtest.models.Student
 import com.example.realmtest.models.Teacher
 import io.realm.kotlin.UpdatePolicy
+import io.realm.kotlin.delete
 import io.realm.kotlin.ext.query
 import io.realm.kotlin.ext.realmListOf
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,10 +23,7 @@ class MainViewModel : ViewModel() {
     private val realm = App.realm
 
     val courses = realm
-        .query<Course>(
-            "teacher.address.fullName CONTAINS $0",
-            "Sam"
-        )
+        .query<Course>()
         .asFlow()
         .map { results ->
             results.list.toList()
@@ -33,8 +34,19 @@ class MainViewModel : ViewModel() {
             emptyList()
         )
 
+    var courseDetails: Course? by mutableStateOf(null)
+        private set
+
     init {
         //createSampleEntries()
+    }
+
+    fun showCourseDetails(course: Course) {
+        courseDetails = course
+    }
+
+    fun hideCourseDetails() {
+        courseDetails = null
     }
 
     private fun createSampleEntries() {
@@ -101,6 +113,18 @@ class MainViewModel : ViewModel() {
 
                 copyToRealm(student1, updatePolicy = UpdatePolicy.ALL)
                 copyToRealm(student2, updatePolicy = UpdatePolicy.ALL)
+            }
+        }
+    }
+
+    fun deleteCourse() {
+        viewModelScope.launch {
+            realm.write {
+                val course = courseDetails ?: return@write
+                val latestCourse = findLatest(course) ?: return@write
+                delete(latestCourse)
+
+                courseDetails = null
             }
         }
     }
